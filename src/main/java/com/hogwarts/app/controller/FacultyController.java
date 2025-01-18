@@ -16,8 +16,8 @@ public class FacultyController {
     }
 
     @PostMapping
-    public Faculty createFaculty(@RequestParam String name, @RequestParam String color) {
-        return facultyService.createFaculty(name, color);
+    public Faculty createFaculty(@RequestBody Faculty faculty) {
+        return facultyService.createFaculty(faculty.getName(), faculty.getColor());
     }
 
     @GetMapping("{id}")
@@ -26,8 +26,8 @@ public class FacultyController {
     }
 
     @PutMapping("{id}")
-    public Faculty updateFaculty(@PathVariable Long id, @RequestParam String name, @RequestParam String color) {
-        return facultyService.updateFaculty(id, name, color);
+    public Faculty updateFaculty(@PathVariable Long id, @RequestBody Faculty faculty) {
+        return facultyService.updateFaculty(id, faculty.getName(), faculty.getColor());
     }
 
     @DeleteMapping("{id}")
@@ -40,4 +40,3 @@ public class FacultyController {
         return facultyService.findByColor(color);
     }
 }
-

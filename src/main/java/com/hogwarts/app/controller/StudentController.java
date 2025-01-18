@@ -16,8 +16,8 @@ public class StudentController {
     }
 
     @PostMapping
-    public Student createStudent(@RequestParam String name, @RequestParam int age) {
-        return studentService.createStudent(name, age);
+    public Student createStudent(@RequestBody Student student) {
+        return studentService.createStudent(student.getName(), student.getAge());
     }
 
     @GetMapping("{id}")
@@ -26,8 +26,8 @@ public class StudentController {
     }
 
     @PutMapping("{id}")
-    public Student updateStudent(@PathVariable Long id, @RequestParam String name, @RequestParam int age) {
-        return studentService.updateStudent(id, name, age);
+    public Student updateStudent(@PathVariable Long id, @RequestBody Student student) {
+        return studentService.updateStudent(id, student.getName(), student.getAge());
     }
 
     @DeleteMapping("{id}")
