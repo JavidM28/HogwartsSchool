@@ -13,33 +13,15 @@ public class FacultyService {
     private final Map<Long, Faculty> faculties = new HashMap<>();
     private long counter = 1;
 
-    public Faculty createFaculty(String name, String color) {
-        Faculty faculty = new Faculty(counter++, name, color);
+    public Faculty createFaculty(Faculty faculty) {
+        faculty.setId(counter++);
         faculties.put(faculty.getId(), faculty);
         return faculty;
     }
 
-    public Faculty getFaculty(Long id) {
-        return faculties.get(id);
-    }
-
-    public Faculty updateFaculty(Long id, String name, String color) {
-        Faculty faculty = faculties.get(id);
-        if (faculty != null) {
-            faculty.setName(name);
-            faculty.setColor(color);
-        }
-        return faculty;
-    }
-
-    public Faculty deleteFaculty(Long id) {
-        return faculties.remove(id);
-    }
-
-    public List<Faculty> findByColor(String color) {
+    public List<Faculty> findByNameOrColor(String keyword) {
         return faculties.values().stream()
-                .filter(faculty -> faculty.getColor().equalsIgnoreCase(color))
+                .filter(faculty -> faculty.getName().equalsIgnoreCase(keyword) || faculty.getColor().equalsIgnoreCase(keyword))
                 .collect(Collectors.toList());
     }
 }
-

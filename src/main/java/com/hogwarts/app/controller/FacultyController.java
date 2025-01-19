@@ -17,26 +17,11 @@ public class FacultyController {
 
     @PostMapping
     public Faculty createFaculty(@RequestBody Faculty faculty) {
-        return facultyService.createFaculty(faculty.getName(), faculty.getColor());
+        return facultyService.createFaculty(faculty);
     }
 
-    @GetMapping("{id}")
-    public Faculty getFaculty(@PathVariable Long id) {
-        return facultyService.getFaculty(id);
-    }
-
-    @PutMapping("{id}")
-    public Faculty updateFaculty(@PathVariable Long id, @RequestBody Faculty faculty) {
-        return facultyService.updateFaculty(id, faculty.getName(), faculty.getColor());
-    }
-
-    @DeleteMapping("{id}")
-    public Faculty deleteFaculty(@PathVariable Long id) {
-        return facultyService.deleteFaculty(id);
-    }
-
-    @GetMapping("filter")
-    public List<Faculty> findByColor(@RequestParam String color) {
-        return facultyService.findByColor(color);
+    @GetMapping("search")
+    public List<Faculty> searchByNameOrColor(@RequestParam String keyword) {
+        return facultyService.findByNameOrColor(keyword);
     }
 }

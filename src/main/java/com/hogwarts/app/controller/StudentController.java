@@ -20,23 +20,8 @@ public class StudentController {
         return studentService.createStudent(student.getName(), student.getAge());
     }
 
-    @GetMapping("{id}")
-    public Student getStudent(@PathVariable Long id) {
-        return studentService.getStudent(id);
-    }
-
-    @PutMapping("{id}")
-    public Student updateStudent(@PathVariable Long id, @RequestBody Student student) {
-        return studentService.updateStudent(id, student.getName(), student.getAge());
-    }
-
-    @DeleteMapping("{id}")
-    public Student deleteStudent(@PathVariable Long id) {
-        return studentService.deleteStudent(id);
-    }
-
-    @GetMapping("filter")
-    public List<Student> findByAge(@RequestParam int age) {
-        return studentService.findByAge(age);
+    @GetMapping("age-range")
+    public List<Student> findByAgeRange(@RequestParam int min, @RequestParam int max) {
+        return studentService.findByAgeBetween(min, max);
     }
 }

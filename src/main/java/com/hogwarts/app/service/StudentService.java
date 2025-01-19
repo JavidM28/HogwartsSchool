@@ -23,22 +23,9 @@ public class StudentService {
         return students.get(id);
     }
 
-    public Student updateStudent(Long id, String name, int age) {
-        Student student = students.get(id);
-        if (student != null) {
-            student.setName(name);
-            student.setAge(age);
-        }
-        return student;
-    }
-
-    public Student deleteStudent(Long id) {
-        return students.remove(id);
-    }
-
-    public List<Student> findByAge(int age) {
+    public List<Student> findByAgeBetween(int min, int max) {
         return students.values().stream()
-                .filter(student -> student.getAge() == age)
+                .filter(student -> student.getAge() >= min && student.getAge() <= max)
                 .collect(Collectors.toList());
     }
 }
