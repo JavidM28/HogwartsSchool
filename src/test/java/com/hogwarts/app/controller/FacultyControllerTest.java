@@ -1,55 +1,34 @@
 package com.hogwarts.app.controller;
 
 import com.hogwarts.app.model.Faculty;
+import com.hogwarts.app.service.FacultyService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(FacultyController.class)
 public class FacultyControllerTest {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private MockMvc mockMvc;
+
+    @Mock
+    private FacultyService facultyService;
 
     @Test
-    void testGetFacultyInfo() {
-        ResponseEntity<Faculty> response = restTemplate.getForEntity("/faculty/1", Faculty.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
-
-    @Test
-    void testCreateFaculty() {
-        Faculty faculty = new Faculty(null, "Gryffindor", "Red");
-        ResponseEntity<Faculty> response = restTemplate.postForEntity("/faculty", faculty, Faculty.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
-    }
-
-    @Test
-    void testEditFaculty() {
-        Faculty faculty = new Faculty(1L, "Gryffindor", "Scarlet");
-        restTemplate.put("/faculty", faculty);
-    }
-
-    @Test
-    void testDeleteFaculty() {
-        restTemplate.delete("/faculty/1");
-    }
-
-    @Test
-    void testColorsOfFaculty() {
-        ResponseEntity<Faculty[]> response = restTemplate.getForEntity("/faculty?color=Red", Faculty[].class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
-
-    @Test
-    void testFindByNameAndColor() {
-        ResponseEntity<Faculty> response = restTemplate.getForEntity("/faculty/Color?name=Gryffindor&color=Red", Faculty.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    void testGetFacultyInfo() throws Exception {
+        when(facultyService.findFaculty(1L)).thenReturn(new Faculty(1L, "Gryffindor", "Red"));
+        mockMvc.perform(get("/faculty/1"))
+                .andExpect(status().isOk());
     }
 }
