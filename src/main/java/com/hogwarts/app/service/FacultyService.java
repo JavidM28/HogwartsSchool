@@ -1,45 +1,45 @@
 package com.hogwarts.app.service;
 
+import com.hogwarts.app.repository.FacultyRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hogwarts.app.model.Faculty;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class FacultyService {
-    private final Map<Long, Faculty> faculties = new HashMap<>();
-    private long counter = 1;
 
-    public Faculty createFaculty(String name, String color) {
-        Faculty faculty = new Faculty(counter++, name, color);
-        faculties.put(faculty.getId(), faculty);
-        return faculty;
+    @Autowired
+    private FacultyRepository facultyRepository;
+
+    public FacultyService(FacultyRepository facultyRepository) {
+        this.facultyRepository = facultyRepository;
     }
 
-    public Faculty getFaculty(Long id) {
-        return faculties.get(id);
+    public Faculty addFaculty(Faculty faculty) {
+        return facultyRepository.save(faculty);
     }
 
-    public Faculty updateFaculty(Long id, String name, String color) {
-        Faculty faculty = faculties.get(id);
-        if (faculty != null) {
-            faculty.setName(name);
-            faculty.setColor(color);
-        }
-        return faculty;
+    public Faculty findFaculty(long id) {
+        return facultyRepository.findById(id).get();
     }
 
-    public Faculty deleteFaculty(Long id) {
-        return faculties.remove(id);
+    public Faculty editFaculty(Faculty faculty) {
+        return facultyRepository.save(faculty);
     }
 
-    public List<Faculty> findByColor(String color) {
-        return faculties.values().stream()
-                .filter(faculty -> faculty.getColor().equalsIgnoreCase(color))
-                .collect(Collectors.toList());
+
+    public void deleteFaculty(long id) {
+        facultyRepository.deleteById(id);
+    }
+
+    public List<Faculty> facultyColor(String color) {
+        return facultyRepository.findAll().stream().filter(faculty -> faculty.getColor().equals(color)).collect(Collectors.toList());
+    }
+
+    public Faculty findByNameIgnoreCaseAndColorIgnoreCase(String name, String color) {
+        return facultyRepository.findByNameIgnoreCase(name, color);
     }
 }
-

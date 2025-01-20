@@ -1,44 +1,44 @@
 package com.hogwarts.app.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hogwarts.app.model.Student;
+import com.hogwarts.app.repository.StudentRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
 @Service
 public class StudentService {
-    private final Map<Long, Student> students = new HashMap<>();
-    private long counter = 1;
+    @Autowired
+    private StudentRepository studentRepository;
 
-    public Student createStudent(String name, int age) {
-        Student student = new Student(counter++, name, age);
-        students.put(student.getId(), student);
-        return student;
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
     }
 
-    public Student getStudent(Long id) {
-        return students.get(id);
+    public Student addStudent(Student student) {
+        return studentRepository.save(student);
     }
 
-    public Student updateStudent(Long id, String name, int age) {
-        Student student = students.get(id);
-        if (student != null) {
-            student.setName(name);
-            student.setAge(age);
-        }
-        return student;
+    public Student findStudent(long id) {
+        return studentRepository.findById(id).get();
     }
 
-    public Student deleteStudent(Long id) {
-        return students.remove(id);
+    public Student editStudent(Student student) {
+        return studentRepository.save(student);
     }
 
-    public List<Student> findByAge(int age) {
-        return students.values().stream()
-                .filter(student -> student.getAge() == age)
-                .collect(Collectors.toList());
+    public void deleteStudent(long id) {
+        studentRepository.deleteById(id);
     }
+
+    public Collection<Student> getAllStudent() {
+        return studentRepository.findAll();
+    }
+
+    public Collection<Student> findByAgeBetween(int fromAge, int toAge) {
+        return studentRepository.findByAgeBetween(fromAge, toAge);
+    }
+
+
 }
