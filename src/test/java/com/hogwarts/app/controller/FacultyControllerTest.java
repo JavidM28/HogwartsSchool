@@ -1,78 +1,119 @@
 package com.hogwarts.app.controller;
 
 import com.hogwarts.app.model.Faculty;
-import com.hogwarts.app.service.FacultyService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(FacultyController.class)
+@SpringBootTest
 public class FacultyControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private RestTemplate restTemplate;
 
-    @Mock
-    private FacultyService facultyService;
+    private static final String BASE_URL = "http://localhost:8080/faculty";
 
     @Test
-    void testGetFacultyInfo() throws Exception {
-        Faculty mockFaculty = new Faculty(1L, "Gryffindor", "Red");
-        when(facultyService.findFaculty(1L)).thenReturn(mockFaculty);
+    void testGetFacultyInfo_Success() {
+        ResponseEntity<Faculty> response = restTemplate.getForEntity(BASE_URL + "/1", Faculty.class);
 
-        mockMvc.perform(get("/faculty/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Gryffindor"))
-                .andExpect(jsonPath("$.color").value("Red"));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Faculty faculty = response.getBody();
+        assertThat(faculty).isNotNull();
+        assertThat(faculty.getId()).isEqualTo(1L);
+        assertThat(faculty.getName()).isEqualTo("Gryffindor");
+        assertThat(faculty.getColor()).isEqualTo("Red");
     }
 
     @Test
-    void testCreateFaculty() throws Exception {
-        Faculty newFaculty = new Faculty(2L, "Slytherin", "Green");
-        when(facultyService.addFaculty(newFaculty)).thenReturn(newFaculty);
-
-        String requestBody = "{\"id\":2,\"name\":\"Slytherin\",\"color\":\"Green\"}";
-
-        mockMvc.perform(post("/faculty")
-                        .contentType(APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(2L))
-                .andExpect(jsonPath("$.name").value("Slytherin"))
-                .andExpect(jsonPath("$.color").value("Green"));
+    void testGetFacultyInfo_NotFound() {
+        try {
+            restTemplate.getForEntity(BASE_URL + "/99", Faculty.class);
+        } catch (HttpClientErrorException ex) {
+            assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Test
-    void testEditFaculty() throws Exception {
+    void testCreateFaculty_Success() {
+        Faculty newFaculty = new Faculty(null, "Slytherin", "Green");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Faculty> request = new HttpEntity<>(newFaculty, headers);
+
+        ResponseEntity<Faculty> response = restTemplate.postForEntity(BASE_URL, request, Faculty.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Faculty createdFaculty = response.getBody();
+        assertThat(createdFaculty).isNotNull();
+        assertThat(createdFaculty.getName()).isEqualTo("Slytherin");
+        assertThat(createdFaculty.getColor()).isEqualTo("Green");
+    }
+
+    @Test
+    void testCreateFaculty_InvalidInput() {
+        Faculty invalidFaculty = new Faculty(null, "", "");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Faculty> request = new HttpEntity<>(invalidFaculty, headers);
+
+        try {
+            restTemplate.postForEntity(BASE_URL, request, String.class);
+        } catch (HttpClientErrorException ex) {
+            assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Test
+    void testEditFaculty_Success() {
         Faculty updatedFaculty = new Faculty(1L, "Gryffindor", "Scarlet");
-        when(facultyService.editFaculty(updatedFaculty)).thenReturn(updatedFaculty);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Faculty> request = new HttpEntity<>(updatedFaculty, headers);
 
-        String requestBody = "{\"id\":1,\"name\":\"Gryffindor\",\"color\":\"Scarlet\"}";
+        ResponseEntity<Faculty> response = restTemplate.exchange(BASE_URL, HttpMethod.PUT, request, Faculty.class);
 
-        mockMvc.perform(put("/faculty")
-                        .contentType(APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Gryffindor"))
-                .andExpect(jsonPath("$.color").value("Scarlet"));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Faculty faculty = response.getBody();
+        assertThat(faculty).isNotNull();
+        assertThat(faculty.getColor()).isEqualTo("Scarlet");
     }
 
     @Test
-    void testDeleteFaculty() throws Exception {
-        mockMvc.perform(delete("/faculty/1"))
-                .andExpect(status().isOk());
+    void testEditFaculty_InvalidInput() {
+        Faculty invalidFaculty = new Faculty(null, "", "");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Faculty> request = new HttpEntity<>(invalidFaculty, headers);
+
+        try {
+            restTemplate.exchange(BASE_URL, HttpMethod.PUT, request, String.class);
+        } catch (HttpClientErrorException ex) {
+            assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
     }
 
+    @Test
+    void testDeleteFaculty_Success() {
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<Void> request = new HttpEntity<>(null, headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(BASE_URL + "/1", HttpMethod.DELETE, request, Void.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void testDeleteFaculty_NotFound() {
+        try {
+            restTemplate.exchange(BASE_URL + "/99", HttpMethod.DELETE, null, Void.class);
+        } catch (HttpClientErrorException ex) {
+            assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
 }
