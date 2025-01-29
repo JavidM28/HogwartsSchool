@@ -12,7 +12,7 @@ public class Avatar {
 
     private String url;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
