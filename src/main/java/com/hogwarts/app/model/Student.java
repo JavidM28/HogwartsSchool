@@ -1,7 +1,7 @@
 package com.hogwarts.app.model;
 
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.Min;
 import java.util.Objects;
 
 @Entity
@@ -11,7 +11,11 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @Min(16)
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 20")
     private int age;
 
     @ManyToOne
