@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/hw4-indexes.yml
