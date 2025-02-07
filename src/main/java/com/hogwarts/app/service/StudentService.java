@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import java.util.Collection;
 
 @Service
@@ -68,5 +72,34 @@ public class StudentService {
     public Collection<Student> findLastFiveStudents() {
         logger.info("Was invoked method findLastFiveStudents");
         return studentRepository.findLastFiveStudents();
+    }
+    public List<String> getStudentNamesStartingWithA() {
+        logger.info("Was invoked method getStudentNamesStartingWithA");
+        return studentRepository.findAll().stream()
+                .map(student -> student.getName().toUpperCase())
+                .filter(name -> name.startsWith("A"))
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public double getAverageStudentAge() {
+        logger.info("Was invoked method getAverageStudentAge");
+        List<Student> students = studentRepository.findAll();
+        return students.stream()
+                .mapToInt(Student::getAge)
+                .average()
+                .orElse(0.0);
+    }
+    public String getLongestFacultyName() {
+        logger.info("Was invoked method getLongestFacultyName");
+        return studentRepository.findAll().stream()
+                .map(student -> student.getFaculty() != null ? student.getFaculty().getName() : "")
+                .max(Comparator.comparingInt(String::length))
+                .orElse("");
+    }
+
+    public int calculateOptimizedSum() {
+        logger.info("Was invoked method calculateOptimizedSum");
+        return (1_000_000 * (1_000_000 + 1)) / 2; // O(1) формула суммы арифметической прогрессии
     }
 }
